@@ -4,7 +4,7 @@ class Markups:
 
     def __init__(self):
         # markups
-        self.main = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+        self.main = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1, one_time_keyboard=True)
 
         # buttons
         self.add_new_user_btn = types.KeyboardButton("📝 Додати запис")

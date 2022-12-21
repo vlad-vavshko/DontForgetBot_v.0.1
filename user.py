@@ -98,3 +98,10 @@ class User:
                     astro_sign = "♐ Стрілець"
 
         return astro_sign
+
+
+    def check_user_name_exists(self, searching_user, user_records):
+        for name in user_records:
+            if searching_user.lower() == name[0].lower():
+                return True
+        return False

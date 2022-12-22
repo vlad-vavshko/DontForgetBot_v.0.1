@@ -48,8 +48,6 @@ def process_date_of_birth(message):
 def process_add_complete(message):
     chat_id = message.chat.id
     user.date_of_birth = message.text
-    # result = "chat_id: {}, user_name: {}, date_of_birth: {}".format(chat_id, user_dict[chat_id].user_name, user_dict[chat_id].date_of_birth)
-    # print(result)
     msg = Messages()
     if user.date_of_birth_validation(message.text):
         user.age = user.get_age(message.text)

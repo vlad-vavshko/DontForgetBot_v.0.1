@@ -1,6 +1,7 @@
 import telebot
 from bot_files import config
 from db import BotDB
+from telebot import types
 
 from user import User
 from bot_files.markup import Markups
@@ -61,12 +62,50 @@ def process_add_complete(message):
         bot.register_next_step_handler(msg, process_add_complete)
 
 
+@bot.message_handler(commands=['delete'])
+def delete(message):
+    msg = Messages()
+    user_records = BotDB.get_user_records(message.chat.id)
+    if len(user_records) > 0:
+        delete_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=12)
+        for name in user_records:
+            button = types.KeyboardButton(text=name[0])
+            delete_markup.add(button)
+
+        msg = bot.send_message(message.chat.id, "Який запис ви бажаєте видалити?", reply_markup=delete_markup)
+        bot.register_next_step_handler(msg, check_if_name_exists, delete_markup)
+    else:
+        bot.send_message(message.chat.id, msg.nothing_to_delete_msg, reply_markup=markup.main)
+
+def check_if_name_exists(message, delete_markup):
+    msg = Messages()
+    user_to_delete = message.text
+    user_records = BotDB.get_user_records(message.chat.id)
+    # delete_markup = markup.generate_delete_marup(user_records=user_records)
+    if(user.check_user_name_exists(searching_user=user_to_delete, user_records=user_records)):
+        next_step_msg = bot.send_message(message.chat.id, msg.confirm_delete.format(user_to_delete), parse_mode="html", reply_markup=markup.confirm_action)
+        bot.register_next_step_handler(next_step_msg, complete_delete, user_to_delete)
+    else:
+        reply = bot.reply_to(message, "Такого запису не знайдено, спробуйте ще раз!", reply_markup=types.ReplyKeyboardRemove(selective=False))
+        bot.send_message(message.chat.id, "Який запис ви бажаєте видалити?", reply_markup=delete_markup)
+        bot.register_next_step_handler(reply, check_if_name_exists, delete_markup)
+
+def complete_delete(message, user_to_delete):
+
+    if "Так" in message.text:
+        print("yes")
+    elif "Ні" in message.text:
+        bot.send_message(message.chat.id,"", reply_markup=markup.main)
+    else:
+        bot.register_next_step_handler(bot.reply_to(message, "Не зрозумів Вашу відповідь 🤔", reply_markup=markup.confirm_action), complete_delete, user_to_delete)
 
 @bot.message_handler(content_types=['text'])
 def handle_menu_commands(message):
     if message.chat.type == "private":
         if "Додати запис" in message.text:
             add(message)
+        elif "Видалити запис" in message.text:
+            delete(message)
 
 
 

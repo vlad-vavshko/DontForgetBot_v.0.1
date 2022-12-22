@@ -40,6 +40,12 @@ class BotDB:
         result = self.cursor.execute("SELECT `user_name` FROM `records` WHERE `user_id` = (?)", (user_id,))
         return result.fetchall()
 
+    def delete_user_record(self, user_id, user_name):
+        self.connection = sqlite3.connect(self.db_path)
+        self.cursor = self.connection.cursor()
+        self.cursor.execute("DELET FROM `records` (`user_id`, `user_name`) VALUES (?, ?, ?)",
+                            (user_id, user_name,))
+        return self.connection.commit()
 
     def close(self):
         # close DB connection

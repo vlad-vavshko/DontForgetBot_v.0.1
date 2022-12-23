@@ -43,7 +43,7 @@ class BotDB:
     def delete_user_record(self, user_id, user_name):
         self.connection = sqlite3.connect(self.db_path)
         self.cursor = self.connection.cursor()
-        self.cursor.execute("DELET FROM `records` (`user_id`, `user_name`) VALUES (?, ?, ?)",
+        self.cursor.execute("DELETE FROM `records` WHERE `user_id` = (?) AND `user_name` = (?)",
                             (user_id, user_name,))
         return self.connection.commit()
 

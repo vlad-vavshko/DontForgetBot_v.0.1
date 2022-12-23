@@ -58,7 +58,7 @@ def process_add_complete(message):
         bot.send_message(chat_id, complete_message, reply_markup=markup.main, parse_mode="html")
 
     else:
-        msg = bot.reply_to(message, "‼ Ви ввели неправильну дату народження! \n Спробуйте ще раз!.")
+        msg = bot.reply_to(message, "‼ Ви ввели неправильну дату народження! \nСпробуйте ще раз 😉")
         bot.register_next_step_handler(msg, process_add_complete)
 
 
@@ -91,14 +91,19 @@ def check_if_name_exists(message, delete_markup):
         bot.register_next_step_handler(reply, check_if_name_exists, delete_markup)
 
 def complete_delete(message, user_to_delete):
-
-    if "Так" in message.text:
-        print("yes")
-    elif "Ні" in message.text:
-        bot.send_message(message.chat.id,"", reply_markup=markup.main)
-    else:
-        bot.register_next_step_handler(bot.reply_to(message, "Не зрозумів Вашу відповідь 🤔", reply_markup=markup.confirm_action), complete_delete, user_to_delete)
-
+    try:
+        msg = Messages()
+        user_answer = message.text
+        if "так" in user_answer.lower():
+            if BotDB.delete_user_record(user_id=message.chat.id, user_name=user_to_delete) == None:
+                bot.send_message(message.chat.id, msg.delete_success.format(user_to_delete), reply_markup=markup.main, parse_mode="html")
+        elif "ні" in user_answer.lower():
+            bot.send_message(message.chat.id,"Скасування... 🚫", reply_markup=markup.main)
+        else:
+            bot.register_next_step_handler(bot.reply_to(message, "Не зрозумів Вашу відповідь 🤔", reply_markup=markup.confirm_action), complete_delete, user_to_delete)
+    except Exception as e:
+        bot.reply_to("Щось пішло не так, спробуйте будь ласка пізніше  😵‍")
+        print(e)
 @bot.message_handler(content_types=['text'])
 def handle_menu_commands(message):
     if message.chat.type == "private":

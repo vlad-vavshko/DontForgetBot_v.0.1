@@ -1,8 +1,7 @@
-
 import datetime
 from datetime import date
 import re
-
+import months
 
 class User:
     def __init__(self):
@@ -18,18 +17,35 @@ class User:
                 birthdate)
             day_of_birth = datetime.datetime.strptime(birthdate, '%d.%m.%Y').date()
             today = date.today()
-            if match != None and (day_of_birth < today) is True:
+            if match != None and (day_of_birth <= today) is True:
                 return True
             else:
                 return False
         except Exception as e:
             print(e)
 
-    def get_age(self, birthdate):
+    def get_age(self,birthdate):
         today = date.today()
         day_of_birth = datetime.datetime.strptime(birthdate, '%d.%m.%Y').date()
-        age = today.year - day_of_birth.year - ((today.month, today.day) < (day_of_birth.month, day_of_birth.day))
-        return age
+
+        year = today.year - day_of_birth.year
+        if today.month >= day_of_birth.month:
+            month = today.month - day_of_birth.month
+        else:
+            year = year - 1
+            month = 12 + today.month - day_of_birth.month
+
+        if today.day >= day_of_birth.day:
+            day = today.day - day_of_birth.day
+        else:
+            month = month - 1
+            if month < 0:
+                month = 11
+                year = year - 1
+            days_in_month = months.Month(year, month).n_days - 2
+            day = days_in_month + today.day - day_of_birth.day
+
+        return f"{year}р. {month}м. {day}д."
 
     def get_zodiac_sign(self, birthdate):
         day = int(birthdate.split('.')[0])

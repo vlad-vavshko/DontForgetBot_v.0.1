@@ -81,7 +81,6 @@ def check_if_name_exists(message, delete_markup):
     msg = Messages()
     user_to_delete = message.text
     user_records = BotDB.get_user_records(message.chat.id)
-    # delete_markup = markup.generate_delete_marup(user_records=user_records)
     if(user.check_user_name_exists(searching_user=user_to_delete, user_records=user_records)):
         next_step_msg = bot.send_message(message.chat.id, msg.confirm_delete.format(user_to_delete), parse_mode="html", reply_markup=markup.confirm_action)
         bot.register_next_step_handler(next_step_msg, complete_delete, user_to_delete)

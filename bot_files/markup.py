@@ -21,7 +21,7 @@ class Markups:
         self.main.add(self.add_new_user_btn, self.delete_user_btn, self.get_all_users_info_btn)
         self.confirm_action.add(self.confirm_btn, self.decline_btn)
 
-    def generate_delete_marup(self, user_records):
+    def generate_delete_markup(self, user_records):
         for name in user_records:
             button = types.KeyboardButton(text=name[0])
             self.delete_markup.add(button)

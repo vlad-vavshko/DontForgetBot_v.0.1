@@ -42,7 +42,7 @@ class User:
             if month < 0:
                 month = 11
                 year = year - 1
-            days_in_month = months.Month(year, month).n_days - 2
+            days_in_month = months.Month(day_of_birth.year, day_of_birth.month).n_days
             day = days_in_month + today.day - day_of_birth.day
 
         return f"{year}р. {month}м. {day}д."

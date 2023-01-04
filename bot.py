@@ -25,6 +25,9 @@ def start(message):
     bot.send_message(message.from_user.id, msg.welcome_msg.format(
                          message.from_user.first_name, bot.get_me().first_name), parse_mode="html", reply_markup=markup.main, )
 
+def display_user_info(user):
+    pass
+
 @bot.message_handler(commands=['add'])
 def add(message):
     bot.send_message(message.chat.id, "Для додавання нового запису введіть наступні дані ⬇")
@@ -43,7 +46,7 @@ def process_date_of_birth(message):
             msg = bot.send_message(chat_id, "📅 Дата народження у форматі ДД.ММ.РРРР:")
             bot.register_next_step_handler(msg, process_add_complete)
     except Exception as e:
-        bot.reply_to(message, "oops. Smth goes wrong 😵")
+        bot.reply_to("Щось пішло не так, спробуйте будь ласка пізніше  😵‍")
         print("process_date_of_birth: ", e)
 
 def process_add_complete(message):
@@ -61,12 +64,12 @@ def process_add_complete(message):
         msg = bot.reply_to(message, "‼ Ви ввели неправильну дату народження! \nСпробуйте ще раз 😉")
         bot.register_next_step_handler(msg, process_add_complete)
 
-
 @bot.message_handler(commands=['delete'])
 def delete(message):
     msg = Messages()
     user_records = BotDB.get_user_records(message.chat.id)
     if len(user_records) > 0:
+        # generate markup
         delete_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=12)
         for name in user_records:
             button = types.KeyboardButton(text=name[0])
@@ -103,6 +106,23 @@ def complete_delete(message, user_to_delete):
     except Exception as e:
         bot.reply_to("Щось пішло не так, спробуйте будь ласка пізніше  😵‍")
         print(e)
+
+@bot.message_handler(commands=['review'])
+def review(message):
+    #check if user has records
+    msg =Messages()
+    user_records = BotDB.get_user_records(user_id=message.chat.id)
+    if len(user_records) > 0:
+        # generate markup
+        user_records_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=12, one_time_keyboard=True)
+        for name in user_records:
+            button = types.KeyboardButton(text=name[0])
+            user_records_markup.add(button)
+        user_records_markup.add(types.KeyboardButton(text="Усі записи"))
+        bot.send_message(message.chat.id, "Який запис бажаєте переглянути?", reply_markup=user_records_markup)
+    else:
+        bot.send_message(message.chat.id, msg.nothing_to_review_msg, reply_markup=markup.main)
+
 @bot.message_handler(content_types=['text'])
 def handle_menu_commands(message):
     if message.chat.type == "private":
@@ -110,6 +130,8 @@ def handle_menu_commands(message):
             add(message)
         elif "Видалити запис" in message.text:
             delete(message)
+        elif "Переглянути записи" in message.text:
+            review(message)
 
 
 

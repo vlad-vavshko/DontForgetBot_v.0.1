@@ -25,9 +25,6 @@ def start(message):
     bot.send_message(message.from_user.id, msg.welcome_msg.format(
                          message.from_user.first_name, bot.get_me().first_name), parse_mode="html", reply_markup=markup.main, )
 
-def display_user_info(user):
-    pass
-
 @bot.message_handler(commands=['add'])
 def add(message):
     bot.send_message(message.chat.id, "Для додавання нового запису введіть наступні дані ⬇")
@@ -50,48 +47,57 @@ def process_date_of_birth(message):
         print("process_date_of_birth: ", e)
 
 def process_add_complete(message):
-    chat_id = message.chat.id
-    user.date_of_birth = message.text
-    msg = Messages()
-    if user.date_of_birth_validation(message.text):
-        user.age = user.get_age(message.text)
-        user.zodiac_sign = user.get_zodiac_sign(message.text)
-        complete_message = msg.add_complete_msg.format(user.user_name, user.date_of_birth, user.age, user.zodiac_sign)
-        BotDB.add_record(user_id=chat_id, user_name=user.user_name, date_of_birth=user.date_of_birth)
-        bot.send_message(chat_id, complete_message, reply_markup=markup.main, parse_mode="html")
+    try:
+        chat_id = message.chat.id
+        user.date_of_birth = message.text
+        msg = Messages()
+        if user.date_of_birth_validation(message.text):
+            user.age = user.get_age(message.text)
+            user.zodiac_sign = user.get_zodiac_sign(message.text)
+            complete_message = msg.add_complete_msg.format(user.user_name, user.date_of_birth, user.age, user.zodiac_sign)
+            BotDB.add_record(user_id=chat_id, user_name=user.user_name, date_of_birth=user.date_of_birth)
+            bot.send_message(chat_id, complete_message, reply_markup=markup.main, parse_mode="html")
 
-    else:
-        msg = bot.reply_to(message, "‼ Ви ввели неправильну дату народження! \nСпробуйте ще раз 😉")
-        bot.register_next_step_handler(msg, process_add_complete)
-
+        else:
+            msg = bot.reply_to(message, "‼ Ви ввели неправильну дату народження! \nСпробуйте ще раз 😉")
+            bot.register_next_step_handler(msg, process_add_complete)
+    except Exception as e:
+        bot.reply_to("Щось пішло не так, спробуйте будь ласка пізніше  😵‍")
+        print("process_add_complete: ", e)
 @bot.message_handler(commands=['delete'])
 def delete(message):
-    msg = Messages()
-    user_records = BotDB.get_user_records(message.chat.id)
-    if len(user_records) > 0:
-        # generate markup
-        delete_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=12)
-        for name in user_records:
-            button = types.KeyboardButton(text=name[0])
-            delete_markup.add(button)
+    try:
+        msg = Messages()
+        user_records = BotDB.get_user_records(message.chat.id)
+        if len(user_records) > 0:
+            # generate markup
+            delete_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=12)
+            for name in user_records:
+                button = types.KeyboardButton(text=name[0])
+                delete_markup.add(button)
 
-        msg = bot.send_message(message.chat.id, "Який запис ви бажаєте видалити?", reply_markup=delete_markup)
-        bot.register_next_step_handler(msg, check_if_name_exists, delete_markup)
-    else:
-        bot.send_message(message.chat.id, msg.nothing_to_delete_msg, reply_markup=markup.main)
-
+            msg = bot.send_message(message.chat.id, "Який запис ви бажаєте видалити?", reply_markup=delete_markup)
+            bot.register_next_step_handler(msg, check_if_name_exists, delete_markup)
+        else:
+            bot.send_message(message.chat.id, msg.nothing_to_delete_msg, reply_markup=markup.main)
+    except Exception as e:
+        bot.reply_to("Щось пішло не так, спробуйте будь ласка пізніше  😵‍")
+        print("delete: ", e)
 def check_if_name_exists(message, delete_markup):
-    msg = Messages()
-    user_to_delete = message.text
-    user_records = BotDB.get_user_records(message.chat.id)
-    if(user.check_user_name_exists(searching_user=user_to_delete, user_records=user_records)):
-        next_step_msg = bot.send_message(message.chat.id, msg.confirm_delete.format(user_to_delete), parse_mode="html", reply_markup=markup.confirm_action)
-        bot.register_next_step_handler(next_step_msg, complete_delete, user_to_delete)
-    else:
-        reply = bot.reply_to(message, "Такого запису не знайдено, спробуйте ще раз!", reply_markup=types.ReplyKeyboardRemove(selective=False))
-        bot.send_message(message.chat.id, "Який запис ви бажаєте видалити?", reply_markup=delete_markup)
-        bot.register_next_step_handler(reply, check_if_name_exists, delete_markup)
-
+    try:
+        msg = Messages()
+        user_to_delete = message.text
+        user_records = BotDB.get_user_records(message.chat.id)
+        if(user.check_user_name_exists(searching_user=user_to_delete, user_records=user_records)):
+            next_step_msg = bot.send_message(message.chat.id, msg.confirm_delete.format(user_to_delete), parse_mode="html", reply_markup=markup.confirm_action)
+            bot.register_next_step_handler(next_step_msg, complete_delete, user_to_delete)
+        else:
+            reply = bot.reply_to(message, "Такого запису не знайдено, спробуйте ще раз!", reply_markup=types.ReplyKeyboardRemove(selective=False))
+            bot.send_message(message.chat.id, "Який запис ви бажаєте видалити?", reply_markup=delete_markup)
+            bot.register_next_step_handler(reply, check_if_name_exists, delete_markup)
+    except Exception as e:
+        bot.reply_to("Щось пішло не так, спробуйте будь ласка пізніше  😵‍")
+        print("check_if_name_exists: ", e)
 def complete_delete(message, user_to_delete):
     try:
         msg = Messages()
@@ -109,20 +115,23 @@ def complete_delete(message, user_to_delete):
 
 @bot.message_handler(commands=['review'])
 def review(message):
-    #check if user has records
-    msg =Messages()
-    user_records = BotDB.get_user_records(user_id=message.chat.id)
-    if len(user_records) > 0:
-        # generate markup
-        user_records_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=12, one_time_keyboard=True)
-        for name in user_records:
-            button = types.KeyboardButton(text=name[0])
-            user_records_markup.add(button)
-        user_records_markup.add(types.KeyboardButton(text="Усі записи"))
-        bot.send_message(message.chat.id, "Який запис бажаєте переглянути?", reply_markup=user_records_markup)
-    else:
-        bot.send_message(message.chat.id, msg.nothing_to_review_msg, reply_markup=markup.main)
-
+    try:
+        #check if user has records
+        msg =Messages()
+        user_records = BotDB.get_user_records(user_id=message.chat.id)
+        if len(user_records) > 0:
+            # generate markup
+            user_records_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=12, one_time_keyboard=True)
+            for name in user_records:
+                button = types.KeyboardButton(text=name[0])
+                user_records_markup.add(button)
+            user_records_markup.add(types.KeyboardButton(text="Усі записи"))
+            bot.send_message(message.chat.id, "Який запис бажаєте переглянути?", reply_markup=user_records_markup)
+        else:
+            bot.send_message(message.chat.id, msg.nothing_to_review_msg, reply_markup=markup.main)
+    except Exception as e:
+        bot.reply_to("Щось пішло не так, спробуйте будь ласка пізніше  😵‍")
+        print("review: ", e)
 @bot.message_handler(content_types=['text'])
 def handle_menu_commands(message):
     if message.chat.type == "private":

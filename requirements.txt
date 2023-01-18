@@ -1,5 +1,4 @@
 telebot
-sqlite3==3.38.4
 datetime
 re
 months

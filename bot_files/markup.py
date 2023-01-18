@@ -6,20 +6,28 @@ class Markups:
         # markups
         self.main = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1, one_time_keyboard=True)
         self.delete_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=12)
-        self.confirm_action = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=6, one_time_keyboard=True)
+        self.dlt_confirm_action = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=6, one_time_keyboard=True)
+        self.review_confirm_action = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=6, one_time_keyboard=True)
 
         # buttons
         self.add_new_user_btn = types.KeyboardButton("📝 Додати запис")
         self.delete_user_btn = types.KeyboardButton("❌Видалити запис")
         self.get_all_users_info_btn = types.KeyboardButton("📖 Переглянути записи")
 
-        self.confirm_btn = types.KeyboardButton("🗑 Так")
-        self.decline_btn = types.KeyboardButton("⛔ Ні")
+        self.dlt_confirm_btn = types.KeyboardButton("🗑 Так")
+        self.dlt_decline_btn = types.KeyboardButton("⛔ Ні")
+
+        self.review_confirm_btn = types.KeyboardButton("Так")
+        self.review_decline_btn = types.KeyboardButton("Ні")
 
 
-        # add buttons to marup
+
+
+        # add buttons to markup
         self.main.add(self.add_new_user_btn, self.delete_user_btn, self.get_all_users_info_btn)
-        self.confirm_action.add(self.confirm_btn, self.decline_btn)
+        self.dlt_confirm_action.add(self.dlt_confirm_btn, self.dlt_decline_btn)
+        self.review_confirm_action.add(self.review_confirm_btn, self.review_decline_btn)
+
 
     def generate_delete_markup(self, user_records):
         for name in user_records:

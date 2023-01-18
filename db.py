@@ -40,6 +40,18 @@ class BotDB:
         result = self.cursor.execute("SELECT `user_name` FROM `records` WHERE `user_id` = (?)", (user_id,))
         return result.fetchall()
 
+    def get_record_details(self, user_id, user_name):
+        self.connection = sqlite3.connect(self.db_path)
+        self.cursor = self.connection.cursor()
+        result = self.cursor.execute("SELECT `user_name`, `date_of_birth` FROM `records` WHERE `user_id` = (?) and user_name = (?)", (user_id, user_name))
+        return result.fetchall()
+
+    def get_all_records_details(self, user_id):
+        self.connection = sqlite3.connect(self.db_path)
+        self.cursor = self.connection.cursor()
+        result = self.cursor.execute("SELECT `user_name`, `date_of_birth` FROM `records` WHERE `user_id` = (?)", (user_id,))
+        return result.fetchall()
+
     def delete_user_record(self, user_id, user_name):
         self.connection = sqlite3.connect(self.db_path)
         self.cursor = self.connection.cursor()
